@@ -1,8 +1,11 @@
 from django.db import models
+from django.contrib.auth.models import User
 
-# Create your models here.
+
 class tarea(models.Model):
     
+
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="tareas")
     titulo = models.CharField(max_length=20)
     descripcion = models.TextField(blank=True) #esta caracteristica dice que el campo puede estar vacio
     hecho = models.BooleanField(default=False)

@@ -10,10 +10,10 @@ from rest_framework.authentication import TokenAuthentication
 
 @api_view(['POST'])
 def login(request):
-    username = request.data.get('username')
+    email = request.data.get('email')
     password = request.data.get('password')
 
-    user = get_object_or_404(User, username=username)
+    user = get_object_or_404(User, email=email)
 
     if not user.check_password(password):
         return Response({"error": "Invalid password"}, status=400)
@@ -26,25 +26,42 @@ def login(request):
 
 @api_view(['POST'])
 def register(request):
-    serializer = UserSerializer(data=request.data)
+    nombre = request.data.get('nombre')
+    apellido = request.data.get('apellido')
+    correo = request.data.get('correo')
+    password = request.data.get('password')
 
-    if serializer.is_valid():
-        user = serializer.save()
-        user.set_password(serializer.validated_data['password'])
-        user.save()
+    if not all([nombre, apellido, correo, password]):
+        return Response({'error': 'Faltan datos obligatorios.'}, status=400)
 
-        token = Token.objects.create(user=user)
-        return Response({'token': token.key, 'user': serializer.data})
+    username = f"{nombre}{apellido}".replace(" ", "").lower()
 
-    return Response(serializer.errors, status=400)
+    if User.objects.filter(username=username).exists():
+        return Response({'error': 'Ya existe un usuario con ese nombre.'}, status=400)
+
+    user = User.objects.create_user(
+        username=username,
+        email=correo,
+        first_name=nombre,
+        last_name=apellido,
+        password=password
+    )
+
+    token = Token.objects.create(user=user)
+
+    return Response({
+        'token': token.key,
+        'user': {
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name
+        }
+    })
 
 
 @api_view(['POST'])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
 def profile(request):
-
-    
-
-
     return Response({})
