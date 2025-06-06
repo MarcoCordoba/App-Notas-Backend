@@ -7,8 +7,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import AllowAny
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def login(request):
     email = request.data.get('email')
     password = request.data.get('password')
@@ -25,6 +27,7 @@ def login(request):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny]) 
 def register(request):
     nombre = request.data.get('nombre')
     apellido = request.data.get('apellido')
